@@ -1,4 +1,4 @@
-FROM python:3.6-slim-jessie
+FROM python:3.6.7-slim-jessie
 
 USER root
 
@@ -33,7 +33,6 @@ RUN set -x && \
     locales \
     build-essential \
     git \
-    oracle-java8-installer \
   && \
   apt-get install -y --no-install-recommends ca-certificates wget vim && \
   sed -i 's/^# en_US.UTF-8 UTF-8$/en_US.UTF-8 UTF-8/g' /etc/locale.gen && locale-gen && \
@@ -50,7 +49,7 @@ RUN set -x && \
   gosu nobody true  && \
   wget -O /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini" && \
   wget -O /usr/local/bin/tini.asc "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini.asc" && \
-  gpg --keyserver ha.pool.sks-keyservers.net --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 && \
+  gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 && \
   gpg --batch --verify /usr/local/bin/tini.asc /usr/local/bin/tini  && \
   rm -r "$GNUPGHOME" /usr/local/bin/tini.asc  && \
   chmod +x /usr/local/bin/tini  && \
@@ -70,16 +69,19 @@ RUN set -x && \
 # Define default workdir
 WORKDIR /root
 
+# This part requires that the current folder contains the specific jdk tar file.
+# Visit https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html to download
+# the appropriate version.
 
 # Add java dynamic memory script
 COPY java-dynamic-memory-opts /srv/java/
-COPY jdk-8u152-linux-x64.tar.gz /tmp/
+COPY jdk-8u191-linux-x64.tar.gz /tmp/
 COPY dynamodb_local_latest.tar.gz /tmp/
 
-# Install Oracle JDK 8u11
+# Install Oracle JDK 8u191
 RUN cd /tmp && \
-    tar xf jdk-8u152-linux-x64.tar.gz -C /srv/java && \
-    rm -f jdk-8u152-linux-x64.tar.gz && \
+    tar xf jdk-8u191-linux-x64.tar.gz -C /srv/java && \
+    rm -f jdk-8u191-linux-x64.tar.gz && \
     ln -s /srv/java/jdk* /srv/java/jdk && \
     ln -s /srv/java/jdk /srv/java/jvm && \
     chown -R java:java /srv/java && \
