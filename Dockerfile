@@ -32,7 +32,8 @@ RUN set -x && \
     curl \
     locales \
     build-essential \
-    git 
+    git && \
+    /root/post-install
 
 # The mkdir statement is necessary, more info here:
 # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199
@@ -40,9 +41,7 @@ RUN set -x && \
   mkdir -p /usr/share/man/man1 && \ 
   apt-get update -qq && \
   apt-get install -y \
-  default-jdk
-
-RUN set -x && \
+  default-jdk && \ 
   apt-get install -y --no-install-recommends ca-certificates wget vim && \
   sed -i 's/^# en_US.UTF-8 UTF-8$/en_US.UTF-8 UTF-8/g' /etc/locale.gen && locale-gen && \
   update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 && \
@@ -66,13 +65,8 @@ RUN set -x && \
   apt-get purge -y --auto-remove wget  && \
   mv /root/aliases /root/.aliases && \
   echo "source ~/.aliases" >> /root/.bashrc && \
-  /root/create-user redis 4201 redis 4201  && \
-  /root/create-user elasticsearch 4202 elasticsearch 4202 && \
-  /root/create-user mongodb 4203 mongodb 4203 && \
-  /root/create-user rabbitmq 4204 rabbitmq 4204 && \
   /root/create-user java 4205 java 4205 && \
   /root/create-user py 4206 py 4206 && \
-  /root/create-user node 4207 node 4207 && \
   /root/create-user docker 4242 docker 4242 && \
   /root/post-install
 
@@ -99,7 +93,7 @@ EXPOSE 8000
 RUN pip install tox==${TOX_VERSION}
 
 # Define default command.
-CMD ["bash"]
+CMD ["bash"]docker build -t aerialtech/debian-python3-tox-dynamodb .
 
 # BUILD IT
 #  docker build -t aerialtech/debian-python3-tox-dynamodb .
