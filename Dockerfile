@@ -1,4 +1,4 @@
-FROM python:3.6.7-slim-jessie
+FROM python:3.6.7-slim-stretch
 
 USER root
 
@@ -32,8 +32,17 @@ RUN set -x && \
     curl \
     locales \
     build-essential \
-    git \
-  && \
+    git 
+
+# The mkdir statement is necessary, more info here:
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199
+RUN set -x && \
+  mkdir -p /usr/share/man/man1 && \ 
+  apt-get update -qq && \
+  apt-get install -y \
+  default-jdk
+
+RUN set -x && \
   apt-get install -y --no-install-recommends ca-certificates wget vim && \
   sed -i 's/^# en_US.UTF-8 UTF-8$/en_US.UTF-8 UTF-8/g' /etc/locale.gen && locale-gen && \
   update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 && \
@@ -42,18 +51,19 @@ RUN set -x && \
   wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"  && \
   wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"  && \
   export GNUPGHOME="$(mktemp -d)"  && \
-  gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4  && \
+  echo "disable-ipv6" >> "${GNUPGHOME}/dirmngr.conf" && \
+  gpg --no-tty --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4  && \
   gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu  && \
   rm -r /usr/local/bin/gosu.asc  && \
   chmod +x /usr/local/bin/gosu  && \
   gosu nobody true  && \
   wget -O /usr/local/bin/tini "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini" && \
   wget -O /usr/local/bin/tini.asc "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini.asc" && \
-  gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 && \
+  gpg --no-tty --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 595E85A6B1B4779EA4DAAEC70B588DFF0527A9B7 && \
   gpg --batch --verify /usr/local/bin/tini.asc /usr/local/bin/tini  && \
   rm -r "$GNUPGHOME" /usr/local/bin/tini.asc  && \
   chmod +x /usr/local/bin/tini  && \
-  apt-get purge -y --auto-remove ca-certificates wget  && \
+  apt-get purge -y --auto-remove wget  && \
   mv /root/aliases /root/.aliases && \
   echo "source ~/.aliases" >> /root/.bashrc && \
   /root/create-user redis 4201 redis 4201  && \
@@ -75,21 +85,7 @@ WORKDIR /root
 
 # Add java dynamic memory script
 COPY java-dynamic-memory-opts /srv/java/
-COPY jdk-8u191-linux-x64.tar.gz /tmp/
 COPY dynamodb_local_latest.tar.gz /tmp/
-
-# Install Oracle JDK 8u191
-RUN cd /tmp && \
-    tar xf jdk-8u191-linux-x64.tar.gz -C /srv/java && \
-    rm -f jdk-8u191-linux-x64.tar.gz && \
-    ln -s /srv/java/jdk* /srv/java/jdk && \
-    ln -s /srv/java/jdk /srv/java/jvm && \
-    chown -R java:java /srv/java && \
-    mkdir -p /opt/dynamodb-local && mkdir -p /srv/dynamodb-local && \
-    tar xf /tmp/dynamodb_local_latest.tar.gz -C /opt/dynamodb-local && \
-    rm -f /tmp/dynamodb_local_latest.tar.gz && \
-    chown -R java:java /opt/dynamodb-local && chown -R java:java /srv/dynamodb-local && \
-    /root/post-install
 
 # Define commonly used JAVA_HOME variable
 # Add /srv/java and jdk on PATH variable
@@ -106,6 +102,6 @@ RUN pip install tox==${TOX_VERSION}
 CMD ["bash"]
 
 # BUILD IT
-#  docker build -t sportebois/debian-python3-tox-dynamodb .
+#  docker build -t aerialtech/debian-python3-tox-dynamodb .
 # RUN IT
-#  docker run -it --rm -p 8000:8000 sportebois/debian-python3-tox-dynamodb
+#  docker run -it --rm -p 8000:8000 aerialtech/debian-python3-tox-dynamodb
