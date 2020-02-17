@@ -1,4 +1,4 @@
-FROM python:3.6.7-slim-stretch
+FROM python:3.8.1-slim-buster
 
 USER root
 
@@ -13,7 +13,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LC_ALL=en_US.UTF-8 \
     GOSU_VERSION=1.9 \
     TINI_VERSION=v0.13.2 \
-    TOX_VERSION=3.2.1
+    TOX_VERSION=3.14.5
 
 #add root asset (aliases and fix user id)
 ADD files/* /root/
