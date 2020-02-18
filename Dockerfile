@@ -93,7 +93,7 @@ EXPOSE 8000
 RUN pip install tox==${TOX_VERSION}
 
 # Define default command.
-CMD ["bash"]docker build -t aerialtech/debian-python3-tox-dynamodb .
+CMD ["bash"]
 
 # BUILD IT
 #  docker build -t aerialtech/debian-python3-tox-dynamodb .
