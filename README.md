@@ -1,6 +1,6 @@
 # Docker image with Python3 + tox + DynamoDBlocal on Debian
 
-Build/tool image with Python3.6, tox and dynamodb installed and ready to run. (plus other tools like curl and vi)
+Build/tool image with Python3, tox and dynamodb installed and ready to run. (plus other tools like curl and vi)
 
 Useful to run tests in CI.
 
