@@ -81,6 +81,10 @@ WORKDIR /root
 COPY java-dynamic-memory-opts /srv/java/
 COPY dynamodb_local_latest.tar.gz /tmp/
 
+RUN mkdir /srv/dynamodb-local && \
+    mkdir /opt/dynamodb-local && \
+    tar -C /opt/dynamodb-local -zxf /tmp/dynamodb_local_latest.tar.gz
+
 # Define commonly used JAVA_HOME variable
 # Add /srv/java and jdk on PATH variable
 ENV JAVA_HOME=/srv/java/jre \
